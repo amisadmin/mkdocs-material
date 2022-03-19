@@ -56,8 +56,7 @@ class TagsPlugin(BasePlugin):
 
     # Hack: 2nd pass for tags index page
     def on_nav(self, nav, files, **kwargs):
-        file = self.config.get("tags_file")
-        if file:
+        if file := self.config.get("tags_file"):
             self.tags_file = files.get_file_from_path(file)
             files.append(self.tags_file)
 
@@ -82,7 +81,7 @@ class TagsPlugin(BasePlugin):
 
     # Render tags index
     def __render_tag_index(self, markdown):
-        if not "[TAGS]" in markdown:
+        if "[TAGS]" not in markdown:
             markdown += "\n[TAGS]"
 
         # Replace placeholder in Markdown with rendered tags index
@@ -93,16 +92,13 @@ class TagsPlugin(BasePlugin):
 
     # Render the given tag and links to all pages with occurrences
     def __render_tag_links(self, tag, pages):
-        content = ["## <span class=\"md-tag\">{}</span>".format(tag), ""]
+        content = [f'## <span class="md-tag">{tag}</span>', ""]
         for page in pages:
             url = utils.get_relative_url(
                 page.file.src_path,
                 self.tags_file.src_path
             )
-            content.append("- [{}]({})".format(
-                page.meta.get("title", page.title),
-                url
-            ))
+            content.append(f'- [{page.meta.get("title", page.title)}]({url})')
 
         # Return rendered tag links
         return "\n".join(content)
@@ -111,7 +107,6 @@ class TagsPlugin(BasePlugin):
     def __render_tag(self, tag):
         if not self.tags_file or not self.slugify:
             return dict(name = tag)
-        else:
-            url = self.tags_file.url
-            url += "#{}".format(self.slugify(tag))
-            return dict(name = tag, url = url)
+        url = self.tags_file.url
+        url += f"#{self.slugify(tag)}"
+        return dict(name = tag, url = url)
